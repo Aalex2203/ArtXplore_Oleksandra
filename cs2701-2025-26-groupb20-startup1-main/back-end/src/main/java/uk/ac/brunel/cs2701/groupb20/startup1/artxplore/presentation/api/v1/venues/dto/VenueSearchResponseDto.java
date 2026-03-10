@@ -1,0 +1,24 @@
+package uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto;
+
+import java.util.List;
+import java.util.UUID;
+
+public class VenueSearchResponseDto {
+
+    private List<UUID> venueIds;
+
+    public VenueSearchResponseDto() {
+    }
+
+    public VenueSearchResponseDto(List<UUID> venueIds) {
+        this.venueIds = venueIds;
+    }
+
+    public List<UUID> getVenueIds() {
+        return venueIds;
+    }
+
+    public void setVenueIds(List<UUID> venueIds) {
+        this.venueIds = venueIds;
+    }
+}

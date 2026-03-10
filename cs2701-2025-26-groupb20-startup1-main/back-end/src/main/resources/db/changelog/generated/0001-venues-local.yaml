@@ -1,0 +1,168 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0001-venues-local
+      author: you
+      changes:
+        - createTable:
+            tableName: venues
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(4000)
+              - column:
+                  name: latitude
+                  type: "NUMERIC(10,7)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: longitude
+                  type: "NUMERIC(10,7)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price_tier
+                  type: SMALLINT
+              - column:
+                  name: image_url
+                  type: VARCHAR(500)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: venues
+            indexName: idx_venues_type
+            columns:
+              - column:
+                  name: type
+
+        - createIndex:
+            tableName: venues
+            indexName: idx_venues_name
+            columns:
+              - column:
+                  name: name
+
+        - createTable:
+            tableName: saved_venues
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  name: venue_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  name: saved_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: saved_venues
+            indexName: idx_saved_venues_user_saved_at
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: saved_at
+
+        - createIndex:
+            tableName: saved_venues
+            indexName: idx_saved_venues_venue_saved_at
+            columns:
+              - column:
+                  name: venue_id
+              - column:
+                  name: saved_at
+
+        - addForeignKeyConstraint:
+            baseTableName: saved_venues
+            baseColumnNames: venue_id
+            referencedTableName: venues
+            referencedColumnNames: id
+            onDelete: CASCADE
+            constraintName: fk_saved_venues_venues
+
+        - createTable:
+            tableName: venue_views
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+              - column:
+                  name: venue_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: viewed_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: venue_views
+            indexName: idx_venue_views_user_viewed_at
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: viewed_at
+
+        - createIndex:
+            tableName: venue_views
+            indexName: idx_venue_views_venue_viewed_at
+            columns:
+              - column:
+                  name: venue_id
+              - column:
+                  name: viewed_at
+
+        - addForeignKeyConstraint:
+            baseTableName: venue_views
+            baseColumnNames: venue_id
+            referencedTableName: venues
+            referencedColumnNames: id
+            onDelete: CASCADE
+            constraintName: fk_venue_views_venues
