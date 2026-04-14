@@ -6,6 +6,9 @@ const DATE_FORMAT = new Intl.DateTimeFormat('en-GB', {
     year: 'numeric',
 });
 
+const BASE_URL = 'http://localhost:8080/api/v1/venues';
+const USER_ID = '00000000-0000-0000-0000-000000000001';
+
 const simulateNetwork = async () => {
     const duration = Math.floor(
         NETWORK_LATENCY.min + Math.random() * (NETWORK_LATENCY.max - NETWORK_LATENCY.min)
@@ -97,7 +100,7 @@ export async function getDiscoverEvents(filters = {}) {
             date: 'Nov 24, 2025',
             time: '18:00 - 21:00',
             category: 'Exhibition',
-            image: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+            ImageUrl: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
             price: '£15.00',
             description: 'A retrospective of digital light art featuring prominent London artists.'
         },
@@ -108,7 +111,7 @@ export async function getDiscoverEvents(filters = {}) {
             date: 'Nov 26, 2025',
             time: '20:00 - 23:00',
             category: 'Music',
-            image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+            ImageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
             price: '£22.50',
             description: 'Intimate acoustic performances by emerging indie-folk artists.'
         },
@@ -119,7 +122,7 @@ export async function getDiscoverEvents(filters = {}) {
             date: 'Nov 28, 2025',
             time: '10:00 - 14:00',
             category: 'Workshop',
-            image: 'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+            ImageUrl: 'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
             price: '£45.00',
             description: 'An open-level workshop exploring movement and improvisation techniques.'
         },
@@ -130,7 +133,7 @@ export async function getDiscoverEvents(filters = {}) {
             date: 'Dec 02, 2025',
             time: '11:00 - 13:00',
             category: 'Tour',
-            image: 'https://images.unsplash.com/photo-1554188248-986adbb73be0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+            ImageUrl: 'https://images.unsplash.com/photo-1554188248-986adbb73be0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
             price: 'Free',
             description: 'Guided walking tour of public sculptures in the Square Mile.'
         }
@@ -141,131 +144,212 @@ export async function getDiscoverEvents(filters = {}) {
 
 // SAVED VENUES
 export async function getSavedVenues() {
-    console.info('[stub] GET /api/saved-venues');
+    console.info('[real] GET /api/v1/venues/saved/' + USER_ID);
 
-    const savedVenues = [
-        {
-            id: 'saved-1',
-            name: 'Tate Modern',
-            type: 'museums',
-            address: 'Bankside, London SE1 9TG',
-            image: 'https://images.unsplash.com/photo-1565116147714-63bfb4621d46?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0',
-            savedDate: '2 days ago'
-        },
-        {
-            id: 'saved-2',
-            name: 'Royal Opera House',
-            type: 'theaters',
-            address: 'Bow St, London WC2E 9DD',
-            image: 'https://plus.unsplash.com/premium_photo-1661962571049-792ae9be2d79?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0',
-            savedDate: '1 week ago'
+    try {
+        const response = await fetch(`${BASE_URL}/saved/${USER_ID}`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch saved venue IDs: ${response.status}`);
         }
-    ];
 
-    return respond({ success: true, venues: savedVenues });
+        const data = await response.json();
+        const venueIds = data.venueIds || [];
+
+        if (venueIds.length === 0) {
+            return { success: true, venues: [] };
+        }
+
+        const detailsResponse = await fetch(`${BASE_URL}/details`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(venueIds)
+        });
+
+        if (!detailsResponse.ok) {
+            throw new Error(`Failed to fetch saved venue details: ${detailsResponse.status}`);
+        }
+
+        const venues = await detailsResponse.json();
+
+        return {
+            success: true,
+            venues: venues.map((venue) => ({
+                ...venue,
+                ImageUrl: venue.ImageUrl || 'https://via.placeholder.com/40?text=V',
+                savedDate: 'Recently'
+            }))
+        };
+    } catch (error) {
+        console.error('getSavedVenues error:', error);
+        return { success: false, venues: [] };
+    }
 }
 
 // RECENTLY VIEWED
 export async function getRecentlyViewed() {
-    console.info('[stub] GET /api/recently-viewed');
+    console.info('[real] GET /api/v1/venues/viewed/' + USER_ID);
 
-    const recentlyViewed = [
-        {
-            id: 'recent-1',
-            name: 'Southbank Centre',
-            type: 'cultural',
-            address: 'Belvedere Rd, London SE1 8XX',
-            image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=60',
-            viewedDate: 'Today'
-        },
-        {
-            id: 'recent-2',
-            name: 'Apollo Theatre',
-            type: 'theaters',
-            address: 'Shaftesbury Ave, London W1D 7EZ ',
-            image: 'https://images.unsplash.com/photo-1728175479221-54ae3f0e8683?q=80&w=824&auto=format&fit=crop&ixlib=rb-4.1.0',
-            viewedDate: 'Yesterday'
-        },
-        {
-            id: 'recent-3',
-            name: 'O2 Arena',
-            type: 'music',
-            address: 'Peninsula Square, London SE10 0DX',
-            image: 'https://images.unsplash.com/photo-1723338150317-4e9ee73bdcf9?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0',
-            viewedDate: '3 days ago'
+    try {
+        const response = await fetch(`${BASE_URL}/viewed/${USER_ID}`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch recently viewed venue IDs: ${response.status}`);
         }
-    ];
 
-    return respond({ success: true, venues: recentlyViewed });
+        const data = await response.json();
+        const venueIds = data.venueIds || [];
+
+        if (venueIds.length === 0) {
+            return { success: true, venues: [] };
+        }
+
+        const detailsResponse = await fetch(`${BASE_URL}/details`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(venueIds)
+        });
+
+        if (!detailsResponse.ok) {
+            throw new Error(`Failed to fetch recently viewed venue details: ${detailsResponse.status}`);
+        }
+
+        const venues = await detailsResponse.json();
+
+        return {
+            success: true,
+            venues: venues.map((venue) => ({
+                ...venue,
+                ImageUrl: venue.ImageUrl || 'https://via.placeholder.com/40?text=V',
+                viewedDate: 'Recently'
+            }))
+        };
+    } catch (error) {
+        console.error('getRecentlyViewed error:', error);
+        return { success: false, venues: [] };
+    }
 }
 
 // VENUES
-export async function getVenues(filters = {}) {
-    console.info('[stub] GET /api/venues', filters);
-    const venues = [
-        {
-            id: 1,
-            name: 'The White Cube',
-            type: 'galleries',
-            price: 2,
-            lat: 51.505,
-            lng: -0.09,
-            address: '123 Art Street, London',
-            description: 'A contemporary art gallery in the heart of London.'
-        },
-        {
-            id: 2,
-            name: 'London Museum of History',
-            type: 'museums',
-            price: 1,
-            lat: 51.51,
-            lng: -0.1,
-            address: '45 History Lane, London',
-            description: 'Explore the rich history of London.'
-        },
-        {
-            id: 3,
-            name: 'Royal Theater',
-            type: 'theaters',
-            price: 3,
-            lat: 51.515,
-            lng: -0.09,
-            address: '78 Drama Road, London',
-            description: 'Experience world-class theater performances.'
-        },
-        {
-            id: 4,
-            name: 'Jazz Club Soho',
-            type: 'music',
-            price: 2,
-            lat: 51.512,
-            lng: -0.13,
-            address: '10 Jazz Court, London',
-            description: 'Live jazz music every night.'
-        },
-        {
-            id: 5,
-            name: 'Community Arts Center',
-            type: 'cultural',
-            price: 0,
-            lat: 51.52,
-            lng: -0.08,
-            address: '22 Community Way, London',
-            description: 'A space for community art projects and workshops.'
+export async function getVenues() {
+    try {
+        const response = await fetch('http://localhost:8080/api/v1/venues');
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch venues: ${response.status}`);
         }
-    ];
 
-    // Simple mock filtering over here.
-    const filteredVenues = venues.filter(venue => {
-        return !(filters.type && filters.type[venue.type] === false);
-    });
+        const data = await response.json();
 
-    return respond({ success: true, venues: filteredVenues });
+        const venues = Array.isArray(data)
+            ? data
+            : Array.isArray(data.venues)
+                ? data.venues
+                : Array.isArray(data.content)
+                    ? data.content
+                    : [];
+
+        return { success: true, venues };
+    } catch (error) {
+        console.error('getVenues error:', error);
+        return { success: false, venues: [] };
+    }
+}
+
+
+// SEARCH BAR
+export async function searchVenuesByName(query) {
+    console.info('[real] GET /api/v1/venues/search?query=' + query);
+
+    try {
+        if (!query || !query.trim()) {
+            return { success: true, venues: [] };
+        }
+
+        const searchResponse = await fetch(
+            `${BASE_URL}/search?query=${encodeURIComponent(query.trim())}`
+        );
+
+        if (!searchResponse.ok) {
+            throw new Error(`Failed to search venues: ${searchResponse.status}`);
+        }
+
+        const data = await searchResponse.json();
+        const venueIds = data.venueIds || [];
+
+        if (venueIds.length === 0) {
+            return { success: true, venues: [] };
+        }
+
+        const detailsResponse = await fetch(`${BASE_URL}/details`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(venueIds)
+        });
+
+        if (!detailsResponse.ok) {
+            throw new Error(`Failed to fetch searched venue details: ${detailsResponse.status}`);
+        }
+
+        const venues = await detailsResponse.json();
+
+        return {
+            success: true,
+            venues: venues.map((venue) => ({
+                ...venue,
+                ImageUrl: venue.ImageUrl || 'https://via.placeholder.com/40?text=V'
+            }))
+        };
+    } catch (error) {
+        console.error('searchVenuesByName error:', error);
+        return { success: false, venues: [] };
+    }
+}
+
+// SAVE VENUE
+export async function saveVenueForUser(venueId) {
+    console.info('[real] POST /api/v1/venues/saved/' + USER_ID + '/' + venueId);
+
+    try {
+        const response = await fetch(`${BASE_URL}/saved/${USER_ID}/${venueId}`, {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to save venue: ${response.status}`);
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('saveVenueForUser error:', error);
+        return { success: false };
+    }
+}
+
+// REMOVE SAVED VENUE
+export async function removeSavedVenueForUser(venueId) {
+    console.info('[real] DELETE /api/v1/venues/saved/' + USER_ID + '/' + venueId);
+
+    try {
+        const response = await fetch(`${BASE_URL}/saved/${USER_ID}/${venueId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to remove venue: ${response.status}`);
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('removeSavedVenueForUser error:', error);
+        return { success: false };
+    }
 }
 
 // PROFILE POSTS
 export async function getProfilePosts(userId) {
     console.info('[stub] GET /api/posts', userId);
+
     const posts = [
         {
             id: 'post-1',
@@ -286,5 +370,6 @@ export async function getProfilePosts(userId) {
             comments: 1
         }
     ];
+
     return respond({ success: true, posts });
 }

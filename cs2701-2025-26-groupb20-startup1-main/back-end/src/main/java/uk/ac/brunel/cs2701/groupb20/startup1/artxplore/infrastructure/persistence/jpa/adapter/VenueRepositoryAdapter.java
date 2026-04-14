@@ -49,6 +49,11 @@ public class VenueRepositoryAdapter implements VenueRepository {
     }
 
     @Override
+    public List<VenueEntity> findVenuesByIds(List<UUID> venueIds) {
+    return venueJpaRepository.findAllById(venueIds);
+}
+
+    @Override
     public List<UUID> findVenueIdsWithinBoundsAndTypes(
             BigDecimal minLatitude,
             BigDecimal maxLatitude,

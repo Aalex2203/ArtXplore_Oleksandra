@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.domain.core.model.VenueType;
 import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.domain.venue.repository.VenueRepository;
-import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.infrastructure.persistence.jpa.entity.VenueEntity;
+import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto.VenueResponseDto;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -57,6 +57,21 @@ public class VenueService {
         );
     }
 
+
+    @Transactional(readOnly = true)
+    public List<VenueResponseDto> getAllVenues() {
+    return venueRepository.findAllVenues().stream()
+            .map(venue -> new VenueResponseDto(
+                    venue.getId(),
+                    venue.getName(),
+                    venue.getType().name(),
+                    venue.getAddress(),
+                    venue.getImageUrl(),
+                    venue.getLatitude(),
+                    venue.getLongitude()
+            ))
+            .toList();
+}
     @Transactional(readOnly = true)
     public boolean isVenueSaved(UUID venueId, UUID userId) {
         return venueRepository.isVenueSavedByUser(venueId, userId);
@@ -93,5 +108,24 @@ public class VenueService {
     @Transactional(readOnly = true)
     public List<UUID> searchVenueIdsByName(String query) {
         return venueRepository.findVenueIdsByNameContaining(query);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VenueResponseDto> getVenuesByIds(List<UUID> venueIds) {
+        if (venueIds == null || venueIds.isEmpty()) {
+            return List.of();
+        }
+
+        return venueRepository.findVenuesByIds(venueIds).stream()
+        .map(venue -> new VenueResponseDto(
+                venue.getId(),
+                venue.getName(),
+                venue.getType().name(),
+                venue.getAddress(),
+                venue.getImageUrl(),
+                venue.getLatitude(),
+                venue.getLongitude()
+        ))
+        .toList();
     }
 }

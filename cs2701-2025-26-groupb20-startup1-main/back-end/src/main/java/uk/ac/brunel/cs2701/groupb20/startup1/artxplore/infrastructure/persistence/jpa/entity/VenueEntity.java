@@ -46,7 +46,7 @@ public class VenueEntity {
     private Short priceTier;
 
     @Column(name = "image_url", length = 500)
-    private String imageUrl;
+    private String ImageUrl;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -121,11 +121,11 @@ public class VenueEntity {
     }
 
     public String getImageUrl() {
-        return imageUrl;
+        return  ImageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+        this.ImageUrl = ImageUrl;
     }
 
     public Instant getCreatedAt() {

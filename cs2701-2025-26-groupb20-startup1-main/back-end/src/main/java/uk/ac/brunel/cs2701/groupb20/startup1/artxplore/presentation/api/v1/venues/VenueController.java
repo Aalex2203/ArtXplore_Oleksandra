@@ -9,8 +9,8 @@ import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.domain.core.model.VenueTy
 import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto.RecentlyViewedVenueIdsResponseDto;
 import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto.SavedVenueIdsResponseDto;
 import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto.VenueIdsResponseDto;
-
 import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto.VenueMapQueryDto;
+import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto.VenueResponseDto;
 import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.presentation.api.v1.venues.dto.VenueSearchResponseDto;
 
 import java.util.List;
@@ -26,7 +26,6 @@ public class VenueController {
     public VenueController(VenueService venueService) {
         this.venueService = venueService;
     }
-
 
     @GetMapping("/map")
     public ResponseEntity<VenueIdsResponseDto> getVenuesWithinBounds(
@@ -51,11 +50,17 @@ public class VenueController {
         return ResponseEntity.ok(new VenueIdsResponseDto(venueIds));
     }
 
+    @GetMapping
+    public ResponseEntity<List<VenueResponseDto>> getAllVenues() {
+    List<VenueResponseDto> venues = venueService.getAllVenues();
+    return ResponseEntity.ok(venues);
+}
     @GetMapping("/search")
     public ResponseEntity<VenueSearchResponseDto> searchVenuesByName(@RequestParam String query) {
         List<UUID> venueIds = venueService.searchVenueIdsByName(query);
         return ResponseEntity.ok(new VenueSearchResponseDto(venueIds));
     }
+    
 
     @GetMapping("/saved/{userId}")
     public ResponseEntity<SavedVenueIdsResponseDto> getSavedVenues(@PathVariable UUID userId) {
@@ -85,5 +90,11 @@ public class VenueController {
     public ResponseEntity<RecentlyViewedVenueIdsResponseDto> getRecentlyViewedVenues(@PathVariable UUID userId) {
         List<UUID> venueIds = venueService.getRecentlyViewedVenueIds(userId);
         return ResponseEntity.ok(new RecentlyViewedVenueIdsResponseDto(venueIds));
+    }
+
+   @PostMapping("/details")
+    public ResponseEntity<List<VenueResponseDto>> getVenueDetails(@RequestBody List<UUID> venueIds) {
+        List<VenueResponseDto> venues = venueService.getVenuesByIds(venueIds);
+        return ResponseEntity.ok(venues);
     }
 }
