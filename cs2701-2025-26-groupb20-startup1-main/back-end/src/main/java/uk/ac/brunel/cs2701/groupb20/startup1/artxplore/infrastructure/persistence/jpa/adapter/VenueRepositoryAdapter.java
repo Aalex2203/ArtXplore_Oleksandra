@@ -14,6 +14,7 @@ import uk.ac.brunel.cs2701.groupb20.startup1.artxplore.infrastructure.persistenc
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -39,19 +40,34 @@ public class VenueRepositoryAdapter implements VenueRepository {
     }
 
     @Override
+    public Optional<VenueEntity> findById(UUID venueId) {
+        return venueJpaRepository.findById(venueId);
+    }
+
+    @Override
+    public VenueEntity save(VenueEntity venue) {
+        return venueJpaRepository.save(venue);
+    }
+
+    @Override
     public List<UUID> findVenueIdsWithinBounds(
             BigDecimal minLatitude,
             BigDecimal maxLatitude,
             BigDecimal minLongitude,
             BigDecimal maxLongitude
     ) {
-        return venueJpaRepository.findIdsWithinBounds(minLatitude, maxLatitude, minLongitude, maxLongitude);
+        return venueJpaRepository.findIdsWithinBounds(
+                minLatitude,
+                maxLatitude,
+                minLongitude,
+                maxLongitude
+        );
     }
 
     @Override
     public List<VenueEntity> findVenuesByIds(List<UUID> venueIds) {
-    return venueJpaRepository.findAllById(venueIds);
-}
+        return venueJpaRepository.findAllById(venueIds);
+    }
 
     @Override
     public List<UUID> findVenueIdsWithinBoundsAndTypes(
@@ -78,6 +94,7 @@ public class VenueRepositoryAdapter implements VenueRepository {
     @Override
     public void saveVenueForUser(UUID venueId, UUID userId) {
         SavedVenueId id = new SavedVenueId(userId, venueId);
+
         if (savedVenueJpaRepository.existsById(id)) {
             return;
         }
@@ -104,7 +121,10 @@ public class VenueRepositoryAdapter implements VenueRepository {
 
     @Override
     public List<UUID> findRecentlyViewedVenueIds(UUID userId, int limit) {
-        return venueViewJpaRepository.findRecentVenueIdsByUserId(userId, PageRequest.of(0, limit));
+        return venueViewJpaRepository.findRecentVenueIdsByUserId(
+                userId,
+                PageRequest.of(0, limit)
+        );
     }
 
     @Override

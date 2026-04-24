@@ -125,8 +125,8 @@ public class VenueEntity {
     }
 
     public void setImageUrl(String imageUrl) {
-        this.ImageUrl = ImageUrl;
-    }
+    this.ImageUrl = imageUrl;
+}
 
     public Instant getCreatedAt() {
         return createdAt;

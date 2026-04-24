@@ -8,5 +8,3 @@ public class ArtXploreBackendApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ArtXploreBackendApplication.class, args);
-    }
-}
